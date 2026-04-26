@@ -2,28 +2,8 @@ import { Request, Response } from "express";
 import { AdminService } from "./admin.service";
 import pick from "../../../shared/pick";
 import { adminFilterableFields } from "./admin.constant";
-
-const sendResponse = <T>(
-  res: Response,
-  jsonData: {
-    statusCode: number;
-    success: boolean;
-    message: string;
-    meta?: {
-      page: number;
-      limit: number;
-      total: number;
-    };
-    data: T | null | undefined;
-  },
-) => {
-  res.status(jsonData.statusCode).json({
-    success: jsonData.success,
-    message: jsonData.message,
-    meta: jsonData.meta || null || undefined,
-    data: jsonData.data,
-  });
-};
+import sendResponse from "../../../shared/sendResponse";
+import httpStatus from "http-status";
 
 const getAllFromDB = async (req: Request, res: Response) => {
   try {
@@ -33,7 +13,7 @@ const getAllFromDB = async (req: Request, res: Response) => {
 
     const result = await AdminService.getAllFromDB(filters, options);
     sendResponse(res, {
-      statusCode: 200,
+      statusCode: httpStatus.OK,
       success: true,
       message: "Admin data fetched successfully",
       meta: result.meta,
@@ -53,7 +33,7 @@ const getByIdFromDB = async (req: Request<{ id: string }>, res: Response) => {
   try {
     const result = await AdminService.getByIdFromDB(id);
     sendResponse(res, {
-      statusCode: 200,
+      statusCode: httpStatus.OK,
       success: true,
       message: "Admin data fetched by id",
       data: result,
@@ -72,7 +52,7 @@ const updateIntoDB = async (req: Request<{ id: string }>, res: Response) => {
   try {
     const result = await AdminService.updateIntoDB(id, req.body);
     sendResponse(res, {
-      statusCode: 200,
+      statusCode: httpStatus.OK,
       success: true,
       message: "Admin data updated",
       data: result,
@@ -91,7 +71,7 @@ const deleteFromDB = async (req: Request<{ id: string }>, res: Response) => {
   try {
     const result = await AdminService.deleteFromDB(id);
     sendResponse(res, {
-      statusCode: 200,
+      statusCode: httpStatus.OK,
       success: true,
       message: "Admin data deleted",
       data: result,
