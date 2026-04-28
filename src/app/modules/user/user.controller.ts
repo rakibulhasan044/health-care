@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { userService } from "./user.service";
+import { UserService } from "./user.service";
 
 const createAdmin = async (req: Request, res: Response) => {
   try {
-    const result = await userService.createAdmin(req.body);
+    const result = await UserService.createAdmin(req.body);
     res.status(200).json({
       success: true,
       message: "Admin created successfully",
@@ -12,12 +12,12 @@ const createAdmin = async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error?.name ||"Something went wrong",
-      error: error
+      message: error?.name || "Something went wrong",
+      error: error,
     });
   }
 };
 
-export const userController = {
+export const UserController = {
   createAdmin,
 };
