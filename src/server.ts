@@ -1,11 +1,10 @@
-import { Server } from "node:http";
+import { Server } from "http";
 import app from "./app";
-
-const port = 4000;
+import config from "./config";
 
 async function main() {
-  const server: Server = app.listen(port, () => {
-    console.log("Server is running on port", port);
+  const server: Server = app.listen(config.port, () => {
+    console.log("Server is running on port", config.port);
   });
 }
 
