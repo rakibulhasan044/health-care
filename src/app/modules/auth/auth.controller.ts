@@ -30,7 +30,7 @@ const refreshToken = catchAsync(async (req, res) => {
     res.clearCookie("refreshToken");
     throw new Error("Refresh token not found");
   }
-  
+
   const result = await AuthServices.refreshToken(refreshToken);
 
   sendResponse(res, {
@@ -41,7 +41,19 @@ const refreshToken = catchAsync(async (req, res) => {
   });
 });
 
+const changePassword = catchAsync(async (req, res) => {
+  const user = req.user
+  const result = await AuthServices.changePassword(user, req.body);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Password changed successfully",
+    data: result,
+  });
+});
+
 export const AuthController = {
   loginUser,
   refreshToken,
+  changePassword
 };
