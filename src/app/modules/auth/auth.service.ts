@@ -151,8 +151,7 @@ const resetPassword = async (
   token: string,
   payload: { id: string; password: string },
 ) => {
-  console.log('hello');
-  console.log(token, payload);
+
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       id: payload.id,
@@ -165,7 +164,6 @@ const resetPassword = async (
     config.jwt.reset_pass_token as Secret,
   );
 
-  console.log(isValidToken);
   if (!isValidToken) {
     throw new ApiError(httpStatus.FORBIDDEN, "Forbidden!");
   }
