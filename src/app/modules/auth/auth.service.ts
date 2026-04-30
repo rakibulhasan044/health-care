@@ -4,6 +4,7 @@ import { jwtHelpers } from "../../../helper/jwtHelpers";
 import { UserStatus } from "@prisma/client";
 import config from "../../../config";
 import { Secret } from "jsonwebtoken";
+import emailSender from "./emailSender";
 
 const loginUser = async (payload: { email: string; password: string }) => {
   const userData = await prisma.user.findUniqueOrThrow({
@@ -83,7 +84,7 @@ const changePassword = async (user: any, payload: any) => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       email: user?.email,
-      status: UserStatus.ACTIVE
+      status: UserStatus.ACTIVE,
     },
   });
 
@@ -110,8 +111,43 @@ const changePassword = async (user: any, payload: any) => {
   };
 };
 
+const forgotPassword = async (payload: { email: string }) => {
+  const userData = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: payload.email,
+      status: UserStatus.ACTIVE,
+    },
+  });
+
+  const resetPasswordToken = jwtHelpers.generateToken(
+    { email: userData.email, role: userData.role },
+    config.jwt.reset_pass_token as Secret,
+    config.jwt.reset_pass_token_expires_in,
+  );
+  const resetPassLink =
+    config.reset_pass_link +
+    `?userId=${userData.id}&token=${resetPasswordToken}`;
+
+  await emailSender(
+    userData.email,
+    `
+    <div>
+      <p>Dear user,</p>
+      <p>Your password reset link</p>
+      <a href=${resetPassLink}>
+        <button>
+          Reset Password
+        </button>
+      </a>
+    </div>
+    `,
+  );
+  console.log(resetPassLink);
+};
+
 export const AuthServices = {
   loginUser,
   refreshToken,
   changePassword,
+  forgotPassword,
 };

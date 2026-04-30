@@ -2,6 +2,7 @@ import config from "../../../config";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import { AuthServices } from "./auth.service";
+import { Request } from "express";
 
 const loginUser = catchAsync(async (req, res) => {
   const result = await AuthServices.loginUser(req.body);
@@ -41,13 +42,25 @@ const refreshToken = catchAsync(async (req, res) => {
   });
 });
 
-const changePassword = catchAsync(async (req, res) => {
-  const user = req.user
-  const result = await AuthServices.changePassword(user, req.body);
+const changePassword = catchAsync(
+  async (req: Request & { user?: any }, res) => {
+    const user = req.user;
+    const result = await AuthServices.changePassword(user, req.body);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Password changed successfully",
+      data: result,
+    });
+  },
+);
+
+const forgotPassword = catchAsync(async (req, res) => {
+  const result = await AuthServices.forgotPassword(req.body);
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Password changed successfully",
+    message: "Password reset successfully",
     data: result,
   });
 });
@@ -55,5 +68,6 @@ const changePassword = catchAsync(async (req, res) => {
 export const AuthController = {
   loginUser,
   refreshToken,
-  changePassword
+  changePassword,
+  forgotPassword,
 };
