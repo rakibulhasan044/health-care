@@ -18,8 +18,13 @@ export default {
       "5m") as SignOptions["expiresIn"],
   },
   reset_pass_link: process.env.RESET_PASS_LINK,
-  emailSender :{
+  emailSender: {
     email: process.env.SMTP_USER,
-    app_pass: process.env.SMTP_PASS
-  }
+    app_pass: process.env.SMTP_PASS,
+  },
+  cloudinary: {
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.API_SECRET,
+  },
 };
