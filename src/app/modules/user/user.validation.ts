@@ -2,19 +2,23 @@ import { Gender } from "@prisma/client";
 import { z } from "zod";
 
 const createAdmin = z.object({
-  password: z.string().min(4, "Password must be at least 4 characters"),
+  password: z
+    .string("Password is required")
+    .min(4, "Password must be at least 4 characters"),
   admin: z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
-    email: z.email("Invalid email address").nonempty("email is required"),
+    email: z.string("email is required").email("Invalid email address"),
     contactNumber: z.string("Contact number is required"),
   }),
 });
 
 const createDoctor = z.object({
-  password: z.string("Password is required"),
+  password: z
+    .string("Password is required")
+    .min(4, "Password must be at least 4 characters"),
   doctor: z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
-    email: z.email("Invalid email address").nonempty("email is required"),
+    email: z.string("email is required").email("Invalid email address"),
     contactNumber: z.string("Contact number is required"),
     address: z.string().optional(),
     registrationNumber: z.string("Registration number is required"),
@@ -27,7 +31,18 @@ const createDoctor = z.object({
   }),
 });
 
+const createPatient = z.object({
+  password: z.string(),
+  patient: z.object({
+    email: z.string("Email is required!").email(),
+    name: z.string("Name is required!"),
+    contactNumber: z.string("Contact number is required!"),
+    address: z.string("Address is required"),
+  }),
+});
+
 export const userValidation = {
   createAdmin,
-  createDoctor
+  createDoctor,
+  createPatient
 };

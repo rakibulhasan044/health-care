@@ -1,9 +1,10 @@
-import { UserRole } from "@prisma/client";
+import { Admin, Doctor, UserRole } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 import prisma from "../../../shared/prisma";
 import { fileUploader } from "../../../helper/fileUploader";
+import { Request } from "express";
 
-const createAdmin = async (req: any) => {
+const createAdmin = async (req: Request): Promise<Admin> => {
   const file = req.file;
   const data = req.body;
 
@@ -42,9 +43,13 @@ const createAdmin = async (req: any) => {
   return result;
 };
 
-const createDoctor = async (req: any) => {
+const createDoctor = async (req: Request): Promise<Doctor> => {
   const file = req.file;
   const data = req.body;
+
+  if (!data.doctor) {
+    throw new Error("Doctor data is required");
+  }
 
   if (file) {
     const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
@@ -92,7 +97,7 @@ const createDoctor = async (req: any) => {
         appointmentFee,
         qualification,
         currentWorkingPlace,
-        designation
+        designation,
       },
     });
 
@@ -102,7 +107,54 @@ const createDoctor = async (req: any) => {
   return result;
 };
 
+const createPatient = async (req: Request) => {
+  const file = req.file;
+  const data = req.body;
+
+  if (file) {
+    const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
+    data.patient.profilePhoto = uploadToCloudinary?.secure_url;
+  }
+
+  const hashedPassword: string = await bcrypt.hash(data.password, 12);
+
+  const userData = {
+    email: data.patient.email,
+    password: hashedPassword,
+    role: UserRole.PATIENT,
+  };
+
+  const result = await prisma.$transaction(async (transactionClient) => {
+    await transactionClient.user.create({
+      data: userData,
+    });
+
+    const {
+      email,
+      name,
+      contactNumber,
+      profilePhoto,
+      address,
+    } = data.patient;
+
+    const createdPatientData = await transactionClient.patient.create({
+      data: {
+        name,
+        email,
+        contactNumber,
+        profilePhoto,
+        address,
+      },
+    });
+
+    return createdPatientData;
+  });
+
+  return result;
+};
+
 export const UserService = {
   createAdmin,
-  createDoctor
+  createDoctor,
+  createPatient,
 };

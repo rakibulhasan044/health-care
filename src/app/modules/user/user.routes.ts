@@ -14,6 +14,7 @@ const validateRequest = (schema: any) =>
       req.body = schema.parse(data);
       next();
     } catch (err) {
+      console.log("error from routes");
       next(err);
     }
   };
@@ -32,6 +33,13 @@ router.post(
   fileUploader.upload.single("file"),
   validateRequest(userValidation.createDoctor),
   UserController.createDoctor
+);
+
+router.post(
+  "/create-patient",
+  fileUploader.upload.single("file"),
+  validateRequest(userValidation.createPatient),
+  UserController.createPatient
 );
 
 export const UserRoutes = router;
