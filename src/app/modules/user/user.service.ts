@@ -25,8 +25,15 @@ const createAdmin = async (req: any) => {
       data: userData,
     });
 
+    const { email, name, contactNumber, profilePhoto } = data.admin;
     const createdAdminData = await transactionClient.admin.create({
-      data: data.admin,
+      data: {
+        email,
+        name,
+        contactNumber,
+        // ...(profilePhoto && { profilePhoto }),
+        profilePhoto,
+      },
     });
 
     return createdAdminData;
@@ -35,6 +42,67 @@ const createAdmin = async (req: any) => {
   return result;
 };
 
+const createDoctor = async (req: any) => {
+  const file = req.file;
+  const data = req.body;
+
+  if (file) {
+    const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
+    data.doctor.profilePhoto = uploadToCloudinary?.secure_url;
+  }
+
+  const hashedPassword: string = await bcrypt.hash(data.password, 12);
+
+  const userData = {
+    email: data.doctor.email,
+    password: hashedPassword,
+    role: UserRole.DOCTOR,
+  };
+
+  const result = await prisma.$transaction(async (transactionClient) => {
+    await transactionClient.user.create({
+      data: userData,
+    });
+
+    const {
+      email,
+      name,
+      contactNumber,
+      profilePhoto,
+      address,
+      registrationNumber,
+      experience,
+      gender,
+      appointmentFee,
+      qualification,
+      currentWorkingPlace,
+      designation,
+    } = data.doctor;
+
+    const createdDoctorData = await transactionClient.doctor.create({
+      data: {
+        name,
+        email,
+        contactNumber,
+        profilePhoto,
+        address,
+        registrationNumber,
+        experience,
+        gender,
+        appointmentFee,
+        qualification,
+        currentWorkingPlace,
+        designation
+      },
+    });
+
+    return createdDoctorData;
+  });
+
+  return result;
+};
+
 export const UserService = {
   createAdmin,
+  createDoctor
 };

@@ -19,11 +19,19 @@ const validateRequest = (schema: any) =>
   };
 
 router.post(
-  "/",
+  "/create-admin",
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
   fileUploader.upload.single("file"),
   validateRequest(userValidation.createAdmin),
   UserController.createAdmin
+);
+
+router.post(
+  "/create-doctor",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+  fileUploader.upload.single("file"),
+  validateRequest(userValidation.createDoctor),
+  UserController.createDoctor
 );
 
 export const UserRoutes = router;
