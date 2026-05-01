@@ -1,8 +1,11 @@
-import { Admin, Doctor, UserRole } from "@prisma/client";
+import { Admin, Doctor, Prisma, UserRole } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 import prisma from "../../../shared/prisma";
 import { fileUploader } from "../../../helper/fileUploader";
 import { Request } from "express";
+import { IPagination } from "../../interfaces/pagination";
+import { calculatePagination } from "../../../helper/paginationHelper";
+import { userSearchableFields } from "./user.constant";
 
 const createAdmin = async (req: Request): Promise<Admin> => {
   const file = req.file;
@@ -129,13 +132,7 @@ const createPatient = async (req: Request) => {
       data: userData,
     });
 
-    const {
-      email,
-      name,
-      contactNumber,
-      profilePhoto,
-      address,
-    } = data.patient;
+    const { email, name, contactNumber, profilePhoto, address } = data.patient;
 
     const createdPatientData = await transactionClient.patient.create({
       data: {
@@ -153,8 +150,79 @@ const createPatient = async (req: Request) => {
   return result;
 };
 
+const getAllFromDB = async (params: any, options: IPagination) => {
+  const { limit, page, skip } = calculatePagination(options);
+  const { searchTerm, ...filterData } = params;
+
+  const andCondition: Prisma.UserWhereInput[] = [];
+
+  if (params.searchTerm) {
+    andCondition.push({
+      OR: userSearchableFields.map((field) => ({
+        [field]: {
+          contains: params.searchTerm,
+          mode: "insensitive",
+        },
+      })),
+    });
+  }
+
+  if (Object.keys(filterData).length > 0) {
+    andCondition.push({
+      AND: Object.keys(filterData).map((key) => ({
+        [key]: {
+          equals: (filterData as any)[key],
+        },
+      })),
+    });
+  }
+
+  const whereConditions: Prisma.UserWhereInput =
+    andCondition.length > 0 ? { AND: andCondition } : {};
+
+  const result = await prisma.user.findMany({
+    where: whereConditions,
+    skip,
+    take: limit,
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? {
+            [options.sortBy]: options.sortOrder,
+          }
+        : {
+            createdAt: "desc",
+          },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      needPasswordChange: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      admin: true,
+      doctor: true,
+      patient: true
+    },
+  });
+
+  const total = await prisma.user.count({
+    where: whereConditions,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
+
 export const UserService = {
   createAdmin,
   createDoctor,
   createPatient,
+  getAllFromDB,
 };

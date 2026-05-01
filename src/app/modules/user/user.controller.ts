@@ -1,10 +1,13 @@
 import { Request, Response } from "express";
 import { UserService } from "./user.service";
 import sendResponse from "../../../shared/sendResponse";
+import catchAsync from "../../../shared/catchAsync";
+import pick from "../../../shared/pick";
+import { userFilterableFields } from "./user.constant";
 
 const createAdmin = async (req: Request, res: Response) => {
   const result = await UserService.createAdmin(req);
-  
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -15,7 +18,7 @@ const createAdmin = async (req: Request, res: Response) => {
 
 const createDoctor = async (req: Request, res: Response) => {
   const result = await UserService.createDoctor(req);
-  
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -26,7 +29,7 @@ const createDoctor = async (req: Request, res: Response) => {
 
 const createPatient = async (req: Request, res: Response) => {
   const result = await UserService.createPatient(req);
-  
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -35,8 +38,23 @@ const createPatient = async (req: Request, res: Response) => {
   });
 };
 
+const getAllFromDB = catchAsync(async (req, res) => {
+  const filters = pick(req.query, userFilterableFields)
+  const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder'])
+  const result = await UserService.getAllFromDB(filters, options);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Users data fetched",
+    meta: result.meta,
+    data: result.data,
+  });
+});
+
 export const UserController = {
   createAdmin,
   createDoctor,
-  createPatient
+  createPatient,
+  getAllFromDB
 };

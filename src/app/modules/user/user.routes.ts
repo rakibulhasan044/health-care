@@ -19,6 +19,8 @@ const validateRequest = (schema: any) =>
     }
   };
 
+router.get('/',UserController.getAllFromDB)
+
 router.post(
   "/create-admin",
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
