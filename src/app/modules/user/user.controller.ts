@@ -39,8 +39,9 @@ const createPatient = async (req: Request, res: Response) => {
 };
 
 const getAllFromDB = catchAsync(async (req, res) => {
-  const filters = pick(req.query, userFilterableFields)
-  const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder'])
+  const filters = pick(req.query, userFilterableFields);
+  const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+
   const result = await UserService.getAllFromDB(filters, options);
 
   sendResponse(res, {
@@ -52,9 +53,22 @@ const getAllFromDB = catchAsync(async (req, res) => {
   });
 });
 
+const changeProfileStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await UserService.changeProfileStatus(id as string, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "User profile status changed",
+    data: result,
+  });
+});
+
 export const UserController = {
   createAdmin,
   createDoctor,
   createPatient,
-  getAllFromDB
+  getAllFromDB,
+  changeProfileStatus,
 };

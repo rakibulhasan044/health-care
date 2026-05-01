@@ -1,47 +1,62 @@
-import express, { NextFunction, Request, RequestHandler, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { UserController } from "./user.controller";
 import auth from "../../middlewares/auth";
 import { UserRole } from "@prisma/client";
 import { fileUploader } from "../../../helper/fileUploader";
 import { userValidation } from "./user.validation";
+import validateRequest from "../../middlewares/validateRequest";
 
 const router = express.Router();
 
-const validateRequest = (schema: any) =>
-  (req: Request, res: Response, next: NextFunction) => {
+const validateRequestWithPhoto =
+  (schema: any) => (req: Request, res: Response, next: NextFunction) => {
     try {
       const data = JSON.parse(req.body.data);
       req.body = schema.parse(data);
       next();
     } catch (err) {
-      console.log("error from routes");
-      next(err);
+      router.get(
+        "/",
+        auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+        UserController.getAllFromDB,
+      );
     }
   };
 
-router.get('/',UserController.getAllFromDB)
+router.get(
+  "/",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+  UserController.getAllFromDB,
+);
 
 router.post(
   "/create-admin",
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
   fileUploader.upload.single("file"),
-  validateRequest(userValidation.createAdmin),
-  UserController.createAdmin
+  validateRequestWithPhoto(userValidation.createAdmin),
+  UserController.createAdmin,
 );
 
 router.post(
   "/create-doctor",
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
   fileUploader.upload.single("file"),
-  validateRequest(userValidation.createDoctor),
-  UserController.createDoctor
+  validateRequestWithPhoto(userValidation.createDoctor),
+  UserController.createDoctor,
 );
 
 router.post(
   "/create-patient",
   fileUploader.upload.single("file"),
-  validateRequest(userValidation.createPatient),
-  UserController.createPatient
+  validateRequestWithPhoto(userValidation.createPatient),
+  UserController.createPatient,
+);
+
+router.patch(
+  "/:id/status",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+  validateRequest(userValidation.updateStatus),
+  UserController.changeProfileStatus,
 );
 
 export const UserRoutes = router;

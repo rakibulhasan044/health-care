@@ -202,7 +202,7 @@ const getAllFromDB = async (params: any, options: IPagination) => {
       updatedAt: true,
       admin: true,
       doctor: true,
-      patient: true
+      patient: true,
     },
   });
 
@@ -220,9 +220,27 @@ const getAllFromDB = async (params: any, options: IPagination) => {
   };
 };
 
+const changeProfileStatus = async (id: string, status: UserRole) => {
+  await prisma.user.findUniqueOrThrow({
+    where: {
+      id,
+    },
+  });
+
+  const updateUserStatus = await prisma.user.update({
+    where: {
+      id,
+    },
+    data: status,
+  });
+
+  return updateUserStatus;
+};
+
 export const UserService = {
   createAdmin,
   createDoctor,
   createPatient,
   getAllFromDB,
+  changeProfileStatus,
 };
