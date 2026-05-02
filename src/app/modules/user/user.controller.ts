@@ -4,6 +4,7 @@ import sendResponse from "../../../shared/sendResponse";
 import catchAsync from "../../../shared/catchAsync";
 import pick from "../../../shared/pick";
 import { userFilterableFields } from "./user.constant";
+import { IAuthUser } from "../../interfaces/common";
 
 const createAdmin = async (req: Request, res: Response) => {
   const result = await UserService.createAdmin(req);
@@ -68,7 +69,7 @@ const changeProfileStatus = catchAsync(async (req, res) => {
 const getMyProfile = catchAsync(async (req, res) => {
   const user = req.user
   console.log(user);
-  const result = await UserService.getMyProfile(user);
+  const result = await UserService.getMyProfile(user as IAuthUser);
 
   sendResponse(res, {
     statusCode: 200,
@@ -80,7 +81,7 @@ const getMyProfile = catchAsync(async (req, res) => {
 
 const updateMyProfile = catchAsync(async (req, res) => {
   const user = req.user
-  const result = await UserService.updateMyProfile(user, req);
+  const result = await UserService.updateMyProfile(user as IAuthUser, req);
 
   sendResponse(res, {
     statusCode: 200,
