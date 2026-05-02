@@ -24,6 +24,12 @@ const validateRequestWithPhoto =
   };
 
 router.get(
+  "/me",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
+  UserController.getMyProfile,
+);
+
+router.get(
   "/",
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
   UserController.getAllFromDB,
@@ -57,6 +63,16 @@ router.patch(
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
   validateRequest(userValidation.updateStatus),
   UserController.changeProfileStatus,
+);
+
+router.patch(
+  "/update-my-profile",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
+  fileUploader.upload.single("file"),
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = JSON.parse(req.body.data);
+    return UserController.updateMyProfile(req, res, next);
+  },
 );
 
 export const UserRoutes = router;
