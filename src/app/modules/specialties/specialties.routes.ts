@@ -9,15 +9,20 @@ router.post(
   "/",
   fileUploader.upload.single("file"),
   (req: Request, res: Response, next: NextFunction) => {
-    req.body = SpecialtiesValidations.create.parse(JSON.parse(req.body.data));
-    return SpecialtiesController.insertIntoDB(req, res, next);
+    try {
+      const parsedData = JSON.parse(req.body.data);
+      req.body = SpecialtiesValidations.create.parse(parsedData);
+      return SpecialtiesController.insertIntoDB(req, res, next);
+    } catch (error) {
+      return next(error);
+    }
   },
 );
 
-router .get("/", SpecialtiesController.getAllFromDB);
+router.get("/", SpecialtiesController.getAllFromDB);
 
-router .get("/:id", SpecialtiesController.getById);
+router.get("/:id", SpecialtiesController.getById);
 
-router .delete("/:id", SpecialtiesController.deleteFromDB);
+router.delete("/:id", SpecialtiesController.deleteFromDB);
 
 export const SpecialtiesRoutes = router;
