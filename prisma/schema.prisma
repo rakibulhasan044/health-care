@@ -62,8 +62,10 @@ model Doctor {
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
-  user              User                @relation(fields: [email], references: [email])
+  user User @relation(fields: [email], references: [email])
+
   doctorSpecialties DoctorSpecialties[]
+  doctorSchedules   DoctorSchedules[]
 
   @@map("doctors")
 }
@@ -79,7 +81,8 @@ model Patient {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  user              User               @relation(references: [email], fields: [email])
+  user User @relation(references: [email], fields: [email], onDelete: Cascade)
+
   patientHealthData PatientHealthData?
   medicalReports    MedicalReport[]
 
@@ -90,7 +93,8 @@ model PatientHealthData {
   id        String @id @default(uuid())
   patientId String @unique
 
-  patient             Patient       @relation(fields: [patientId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
   gender              Gender
   dateOfBirth         String
   bloodGroup          BloodGroup
@@ -136,15 +140,44 @@ model DoctorSpecialties {
 }
 
 model MedicalReport {
-  id         String   @id @default(uuid())
-  patientId  String
-  patient    Patient  @relation(fields: [patientId], references: [id])
+  id        String @id @default(uuid())
+  patientId String
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
   reportName String
   reportLink String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
   @@map("medical_reports")
+}
+
+model Schedule {
+  id              String            @id @default(uuid())
+  startDateTime   DateTime
+  endDateTime     DateTime
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  doctorSchedules DoctorSchedules[]
+
+  @@map("schedules")
+}
+
+model DoctorSchedules {
+  doctorId String
+
+  doctor Doctor @relation(fields: [doctorId], references: [id])
+
+  scheduleId String
+
+  schedule Schedule @relation(fields: [scheduleId], references: [id])
+
+  isBooked      Boolean
+  appointmentId String?
+
+  @@id([doctorId, scheduleId])
+  @@map("doctor_schedules")
 }
 
 enum UserRole {

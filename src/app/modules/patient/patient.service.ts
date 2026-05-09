@@ -1,4 +1,4 @@
-import { Patient } from "@prisma/client";
+import { Patient, UserStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import { IPatientUpdate } from "./patient.interface";
 
@@ -26,6 +26,7 @@ const updateIntoDB = async (
   const patientInfo = await prisma.patient.findUniqueOrThrow({
     where: {
       id,
+      isDeleted: false,
     },
   });
 
@@ -78,37 +79,17 @@ const updateIntoDB = async (
   return responseData;
 };
 
-const deleteFromDB = async (id: string) => {
-  console.log(id);
-
-  const user = await prisma.patient.findUniqueOrThrow({
+const deleteFromDB = async (id: string): Promise<Patient | null> => {
+  const patient = await prisma.patient.findUniqueOrThrow({
     where: {
       id,
     },
-    include: {
-      medicalReports: true,
-      patientHealthData: true,
+    select: {
+      email: true,
     },
   });
 
   const result = await prisma.$transaction(async (tx) => {
-    //delete medical report
-    if (user.medicalReports) {
-      await tx.medicalReport.deleteMany({
-        where: {
-          patientId: id,
-        },
-      });
-    }
-    //delete patient health data
-    if (user.patientHealthData) {
-      await tx.patientHealthData.delete({
-        where: {
-          patientId: id,
-        },
-      });
-    }
-
     const deletedPatient = await tx.patient.delete({
       where: {
         id,
@@ -117,7 +98,7 @@ const deleteFromDB = async (id: string) => {
 
     await tx.user.delete({
       where: {
-        email: deletedPatient.email,
+        email: patient.email,
       },
     });
     return deletedPatient;
@@ -126,8 +107,27 @@ const deleteFromDB = async (id: string) => {
   return result;
 };
 
-const softDelete = async (id: string) => {
-  console.log("soft delete");
+const softDelete = async (id: string): Promise<Patient | null> => {
+  return await prisma.$transaction(async (tx) => {
+    const deletedPatient = await tx.patient.update({
+      where: {
+        id,
+      },
+      data: {
+        isDeleted: true,
+      },
+    });
+
+    await tx.user.update({
+      where: {
+        email: deletedPatient.email,
+      },
+      data: {
+        status: UserStatus.DELETED,
+      },
+    });
+    return deletedPatient;
+  });
 };
 
 export const PatientService = {
