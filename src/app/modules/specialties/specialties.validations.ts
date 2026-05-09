@@ -1,9 +1,9 @@
-import {z} from "zod"
+import { z } from "zod";
 
 const create = z.object({
-    title: z.string("Title is required").min(3)
-})
+  title: z.string({ required_error: "Title is required" }),
+});
 
 export const SpecialtiesValidations = {
-    create
-}
+  create,
+};

@@ -29,6 +29,7 @@ const createDoctor = async (req: Request, res: Response) => {
 };
 
 const createPatient = async (req: Request, res: Response) => {
+  console.log(req);
   const result = await UserService.createPatient(req);
 
   sendResponse(res, {

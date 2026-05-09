@@ -16,7 +16,10 @@ const getByIdFromDB = async (id: string): Promise<Patient | null> => {
   return result;
 };
 
-const updateIntoDB = async (id: string, payload: Partial<IPatientUpdate>): Promise<Patient | null> => {
+const updateIntoDB = async (
+  id: string,
+  payload: Partial<IPatientUpdate>,
+): Promise<Patient | null> => {
   const { patientHealthData, medicalReport, ...patientData } = payload;
 
   console.log(patientHealthData, medicalReport);
@@ -26,9 +29,9 @@ const updateIntoDB = async (id: string, payload: Partial<IPatientUpdate>): Promi
     },
   });
 
-  const result = await prisma.$transaction(async (tran) => {
+  await prisma.$transaction(async (tran) => {
     //update Patient data
-    const updatedPatient = await tran.patient.update({
+    await tran.patient.update({
       where: {
         id,
       },
@@ -41,7 +44,7 @@ const updateIntoDB = async (id: string, payload: Partial<IPatientUpdate>): Promi
 
     //create or update patient health data
     if (patientHealthData) {
-      const healthData = await tran.patientHealthData.upsert({
+      await tran.patientHealthData.upsert({
         where: {
           patientId: patientInfo.id,
         },
@@ -53,7 +56,7 @@ const updateIntoDB = async (id: string, payload: Partial<IPatientUpdate>): Promi
       });
     }
     if (medicalReport) {
-      const report = await tran.medicalReport.create({
+      await tran.medicalReport.create({
         data: {
           ...medicalReport,
           patientId: patientInfo.id,
@@ -68,30 +71,42 @@ const updateIntoDB = async (id: string, payload: Partial<IPatientUpdate>): Promi
     },
     include: {
       patientHealthData: true,
-      medicalReports: true
-    }
+      medicalReports: true,
+    },
   });
 
   return responseData;
 };
 
-const deleteFromDB = async (id: string): Promise<Patient | null> => {
-  await prisma.patient.findUniqueOrThrow({
-    where: {
-      id,
-      isDeleted: false,
-    },
+const deleteFromDB = async (id: string) => {
+  const result = await prisma.$transaction(async (tx) => {
+    //delete medical report
+    await tx.medicalReport.deleteMany({
+      where: {
+        patientId: id,
+      },
+    });
+    //delete patient health data
+    await tx.patientHealthData.delete({
+      where: {
+        patientId: id,
+      },
+    });
+
+    const deletedPatient = await tx.patient.delete({
+      where: {
+        id,
+      },
+    });
+
+    await tx.user.delete({
+      where: {
+        email: deletedPatient.email,
+      },
+    });
+    return deletedPatient;
   });
 
-  const result = await prisma.patient.delete({
-    where: {
-      id,
-    },
-    include: {
-      medicalReports: true,
-      patientHealthData: true,
-    },
-  });
   return result;
 };
 

@@ -115,6 +115,9 @@ const createPatient = async (req: Request) => {
   const file = req.file;
   const data = req.body;
 
+  console.log(file);
+  console.log(data);
+
   if (file) {
     const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
     data.patient.profilePhoto = uploadToCloudinary?.secure_url;
