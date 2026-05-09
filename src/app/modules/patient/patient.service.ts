@@ -79,19 +79,35 @@ const updateIntoDB = async (
 };
 
 const deleteFromDB = async (id: string) => {
+  console.log(id);
+
+  const user = await prisma.patient.findUniqueOrThrow({
+    where: {
+      id,
+    },
+    include: {
+      medicalReports: true,
+      patientHealthData: true,
+    },
+  });
+
   const result = await prisma.$transaction(async (tx) => {
     //delete medical report
-    await tx.medicalReport.deleteMany({
-      where: {
-        patientId: id,
-      },
-    });
+    if (user.medicalReports) {
+      await tx.medicalReport.deleteMany({
+        where: {
+          patientId: id,
+        },
+      });
+    }
     //delete patient health data
-    await tx.patientHealthData.delete({
-      where: {
-        patientId: id,
-      },
-    });
+    if (user.patientHealthData) {
+      await tx.patientHealthData.delete({
+        where: {
+          patientId: id,
+        },
+      });
+    }
 
     const deletedPatient = await tx.patient.delete({
       where: {
@@ -110,8 +126,13 @@ const deleteFromDB = async (id: string) => {
   return result;
 };
 
+const softDelete = async (id: string) => {
+  console.log("soft delete");
+};
+
 export const PatientService = {
   getByIdFromDB,
   deleteFromDB,
   updateIntoDB,
+  softDelete,
 };
