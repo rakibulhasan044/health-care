@@ -4,7 +4,7 @@ import { DoctorScheduleService } from "./doctorSchedule.service";
 
 const createIntoDB = catchAsync(async (req, res) => {
   const user = req.user;
-  const result = DoctorScheduleService.createIntoDB(user);
+  const result = await DoctorScheduleService.createIntoDB(user, req.body);
 
   sendResponse(res, {
     statusCode: 200,
