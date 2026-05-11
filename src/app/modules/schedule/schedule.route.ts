@@ -1,10 +1,14 @@
-import express from 'express'
-import { ScheduleController } from './schedule.controller'
+import express from "express";
+import { ScheduleController } from "./schedule.controller";
+import auth from "../../middlewares/auth";
+import { UserRole } from "@prisma/client";
 
-const router = express.Router()
+const router = express.Router();
 
-router.post("/", ScheduleController.createIntoDB)
+router.post("/", ScheduleController.createIntoDB);
 
-router.delete("/", ScheduleController.deleteAllSchedule)
+router.get("/", auth(UserRole.DOCTOR), ScheduleController.getAllFromDB);
 
-export const ScheduleRoutes = router
+router.delete("/", ScheduleController.deleteAllSchedule);
+
+export const ScheduleRoutes = router;
