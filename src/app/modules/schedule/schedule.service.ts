@@ -60,6 +60,12 @@ const createIntoDB = async (payload: ISchedule): Promise<Schedule[]> => {
   return schedules;
 };
 
+const deleteAllSchedule = async () => {
+  const deleteSchedules = await prisma.schedule.deleteMany({});
+  return deleteSchedules;
+};
+
 export const ScheduleService = {
   createIntoDB,
+  deleteAllSchedule,
 };

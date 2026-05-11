@@ -13,6 +13,18 @@ const createIntoDB = catchAsync(async (req, res) => {
   });
 });
 
+const deleteAllSchedule = catchAsync(async (req, res) => {
+  const result = await ScheduleService.deleteAllSchedule();
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Schedule deleted successfully",
+    data: result,
+  });
+});
+
 export const ScheduleController = {
   createIntoDB,
+  deleteAllSchedule
 };
