@@ -55,6 +55,17 @@ const getMySchedule = async (
   }
 
   if (Object.keys(filterData).length > 0) {
+    if (
+      typeof filterData.isBooked === "string" &&
+      filterData.isBooked === "true"
+    ) {
+      filterData.isBooked = true;
+    } else if (
+      typeof filterData.isBooked === "string" &&
+      filterData.isBooked === "false"
+    ) {
+      filterData.isBooked = false;
+    }
     andConditions.push({
       AND: Object.keys(filterData).map((key) => {
         return {
@@ -77,8 +88,12 @@ const getMySchedule = async (
       options.sortBy && options.sortOrder
         ? { [options.sortBy]: options.sortOrder }
         : {},
+    include: {
+      doctor: true,
+      schedule: true,
+    },
   });
-  const total = await prisma.schedule.count({
+  const total = await prisma.doctorSchedules.count({
     where: whereConditions,
   });
 
