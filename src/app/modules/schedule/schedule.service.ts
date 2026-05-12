@@ -147,6 +147,7 @@ const getAllFromDB = async (
     data: result,
   };
 };
+
 const deleteAllSchedule = async () => {
   const deleteSchedules = await prisma.schedule.deleteMany({});
   return deleteSchedules;
