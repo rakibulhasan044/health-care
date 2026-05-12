@@ -3,6 +3,8 @@ import { calculatePagination } from "../../../helper/paginationHelper";
 import prisma from "../../../shared/prisma";
 import { IAuthUser } from "../../interfaces/common";
 import { IPagination } from "../../interfaces/pagination";
+import ApiError from "../../errors/ApiError";
+import httpStatus from "http-status";
 
 const createIntoDB = async (user: any, payload: { scheduleIds: string[] }) => {
   const doctorData = await prisma.doctor.findUniqueOrThrow({
@@ -89,7 +91,6 @@ const getMySchedule = async (
         ? { [options.sortBy]: options.sortOrder }
         : {},
     include: {
-      doctor: true,
       schedule: true,
     },
   });
@@ -107,7 +108,44 @@ const getMySchedule = async (
   };
 };
 
+const deleteFromDB = async (user: IAuthUser, scheduleId: string) => {
+  const doctorData = await prisma.doctor.findUniqueOrThrow({
+    where: {
+      email: user?.email,
+    },
+  });
+
+  const isBookedSchedule = await prisma.doctorSchedules.findUnique({
+    where: {
+      doctorId_scheduleId: {
+        doctorId: doctorData.id,
+        scheduleId: scheduleId,
+      },
+      isBooked: true,
+    },
+  });
+
+  if (isBookedSchedule) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "You can not delete this schedule because this schedule id booked",
+    );
+  }
+
+  const result = await prisma.doctorSchedules.delete({
+    where: {
+      doctorId_scheduleId: {
+        doctorId: doctorData.id,
+        scheduleId: scheduleId,
+      },
+    },
+  });
+};
+
+//all doctor schedule task
+
 export const DoctorScheduleService = {
   createIntoDB,
   getMySchedule,
+  deleteFromDB,
 };

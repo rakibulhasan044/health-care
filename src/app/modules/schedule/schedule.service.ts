@@ -148,6 +148,7 @@ const getAllFromDB = async (
   };
 };
 
+//delete and id get task
 const deleteAllSchedule = async () => {
   const deleteSchedules = await prisma.schedule.deleteMany({});
   return deleteSchedules;
