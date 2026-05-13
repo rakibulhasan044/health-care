@@ -71,6 +71,7 @@ const getAllFromDB = async (
           specialties: true,
         },
       },
+      doctorSchedules: true,
     },
   });
 
@@ -115,7 +116,7 @@ const updateIntoDB = async (id: string, payload: any) => {
   });
 
   await prisma.$transaction(async (transactionClient) => {
-    const updatedDoctorData = await transactionClient.doctor.update({
+    await transactionClient.doctor.update({
       where: {
         id,
       },
@@ -127,7 +128,7 @@ const updateIntoDB = async (id: string, payload: any) => {
 
     if (specialties && specialties.length > 0) {
       const deletedSpecialtiesIds = specialties.filter(
-        (specialty) => specialty.isDeleted,
+        (specialty: any) => specialty.isDeleted,
       );
       console.log(deletedSpecialtiesIds);
       for (const specialty of deletedSpecialtiesIds) {
@@ -141,7 +142,7 @@ const updateIntoDB = async (id: string, payload: any) => {
       }
 
       const createDoctorSpecialtiesIds = specialties.filter(
-        (specialty) => !specialty.isDeleted,
+        (specialty: any) => !specialty.isDeleted,
       );
       for (const specialty of createDoctorSpecialtiesIds) {
         await transactionClient.doctorSpecialties.create({
