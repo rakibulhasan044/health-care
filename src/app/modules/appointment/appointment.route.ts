@@ -14,7 +14,10 @@ router.get(
 router.post(
   "/",
   auth(UserRole.PATIENT),
+  // add zod validation
   AppointmentController.createAppointment,
 );
+
+// get all appointment with filtering only accessable for admin and super admin
 
 export const AppointmentRoutes = router;
