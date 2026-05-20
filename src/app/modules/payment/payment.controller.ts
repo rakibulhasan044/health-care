@@ -3,7 +3,9 @@ import sendResponse from "../../../shared/sendResponse";
 import { PaymentService } from "./payment.service";
 
 const initPayment = catchAsync(async (req, res) => {
-  const result = PaymentService.initPayment();
+  const { appointmentId } = req.params;
+ 
+  const result = await PaymentService.initPayment(appointmentId as string);
 
   sendResponse(res, {
     statusCode: 200,
