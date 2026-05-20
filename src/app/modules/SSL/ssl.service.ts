@@ -50,6 +50,20 @@ const initPayment = async (paymentData: any) => {
   }
 };
 
+const validatePayment = async (payload: any) => {
+  try {
+    const response = await axios({
+      method: "GET",
+      url: `${config.ssl.ssl_validation_api}?val_id=${payload.val_id}&store_id=${config.ssl.store_id}&store_passwd=${config.ssl.store_passwd}&format=json`,
+    });
+
+    return response.data;
+  } catch (error) {
+    throw new ApiError(4001, "PaymentValidation failed");
+  }
+};
+
 export const SSLService = {
   initPayment,
+  validatePayment,
 };
