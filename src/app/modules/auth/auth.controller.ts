@@ -6,11 +6,27 @@ import { Request } from "express";
 
 const loginUser = catchAsync(async (req, res) => {
   const result = await AuthServices.loginUser(req.body);
-  const { refreshToken } = result;
+  const { accessToken, refreshToken } = result;
+
+  res.cookie("accessToken", accessToken, {
+    secure: config.env === "production",
+    httpOnly: true,
+    sameSite: "none",
+    maxAge: 1000 * 60 * 60,
+  });
 
   res.cookie("refreshToken", refreshToken, {
     secure: config.env === "production",
     httpOnly: true,
+    sameSite: "none",
+    maxAge: 1000 * 60 * 60 * 24 * 30,
+  });
+
+  res.cookie("refreshToken", refreshToken, {
+    secure: config.env === "production",
+    httpOnly: true,
+    sameSite: "none",
+    maxAge: 1000 * 60 * 60 * 24 * 30,
   });
 
   sendResponse(res, {
@@ -18,7 +34,6 @@ const loginUser = catchAsync(async (req, res) => {
     success: true,
     message: "user logged in successfully",
     data: {
-      accessToken: result.accessToken,
       needPasswordChange: result.needPasswordChange,
     },
   });
