@@ -6,15 +6,15 @@ import ApiError from "../errors/ApiError";
 import httpStatus from "http-status";
 
 const auth = (...roles: string[]) => {
-  return async (
-    req: Request ,
-    res: Response,
-    next: NextFunction,
-  ) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const token = req.headers.authorization;
+      // req.cookies.accessToken
+      const token = req.cookies.accessToken;
       if (!token) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized!");
+        throw new ApiError(
+          httpStatus.UNAUTHORIZED,
+          "You are not authorized->!",
+        );
       }
       const verifiedUser = jwtHelpers.verifyToken(
         token,

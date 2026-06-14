@@ -26,13 +26,16 @@ const getAllFromDB = async (
   }
 
   if (specialties && specialties.length > 0) {
+    const specialtiesArray = Array.isArray(specialties)
+      ? specialties
+      : [specialties];
     // Corrected specialties condition
     andConditions.push({
       doctorSpecialties: {
         some: {
           specialties: {
             title: {
-              contains: specialties,
+              in: specialtiesArray,
               mode: "insensitive",
             },
           },
@@ -68,10 +71,19 @@ const getAllFromDB = async (
     include: {
       doctorSpecialties: {
         include: {
-          specialties: true,
+          specialties: {
+            select: {
+              title: true,
+            },
+          },
         },
       },
       doctorSchedules: true,
+      reviews: {
+        select: {
+          rating: true,
+        },
+      },
     },
   });
 
@@ -107,54 +119,105 @@ const getByIdFromDB = async (id: string): Promise<Doctor | null> => {
 };
 
 const updateIntoDB = async (id: string, payload: any) => {
-  const { specialties, ...doctorData } = payload;
+  const { specialties, removeSpecialties, ...doctorData } = payload;
 
   const doctorInfo = await prisma.doctor.findUniqueOrThrow({
     where: {
       id,
+      isDeleted: false,
     },
   });
 
   await prisma.$transaction(async (transactionClient) => {
-    await transactionClient.doctor.update({
-      where: {
-        id,
-      },
-      data: doctorData,
-      include: {
-        doctorSpecialties: true,
-      },
-    });
+    //step-1: update doctor basic data
+    if (Object.keys(doctorData).length > 0) {
+      await transactionClient.doctor.update({
+        where: {
+          id,
+        },
+        data: doctorData,
+      });
+    }
 
-    if (specialties && specialties.length > 0) {
-      const deletedSpecialtiesIds = specialties.filter(
-        (specialty: any) => specialty.isDeleted,
-      );
-      console.log(deletedSpecialtiesIds);
-      for (const specialty of deletedSpecialtiesIds) {
-        console.log(specialty);
-        await transactionClient.doctorSpecialties.deleteMany({
+    // step-2: remove specialties if provided
+    if (
+      removeSpecialties &&
+      Array.isArray(removeSpecialties) &&
+      removeSpecialties.length > 0
+    ) {
+      //validate that specialties to remove exit for this doctor
+      const existingDoctorSpecialties =
+        await transactionClient.doctorSpecialties.findMany({
           where: {
             doctorId: doctorInfo.id,
-            specialtiesId: specialty.specialtiesId,
+            specialtiesId: {
+              in: removeSpecialties,
+            },
           },
         });
+    }
+
+    // step: 3 Add New specialties if provided
+    if (specialties && Array.isArray(specialties) && specialties.length > 0) {
+      // Verify all specialties exist in Specialties table
+      const existingSpecialties = await transactionClient.specialties.findMany({
+        where: {
+          id: {
+            in: specialties,
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      const existingSpecialtyIds = existingSpecialties.map((s) => s.id);
+      const invalidSpecialties = specialties.filter(
+        (id) => !existingSpecialtyIds.includes(id),
+      );
+
+      if (invalidSpecialties.length > 0) {
+        throw new Error(
+          `Invalid specialty IDs: ${invalidSpecialties.join(", ")}`,
+        );
       }
 
-      const createDoctorSpecialtiesIds = specialties.filter(
-        (specialty: any) => !specialty.isDeleted,
-      );
-      for (const specialty of createDoctorSpecialtiesIds) {
-        await transactionClient.doctorSpecialties.create({
-          data: {
+      // Check for duplicates - don't add specialties that already exist
+      const currentDoctorSpecialties =
+        await transactionClient.doctorSpecialties.findMany({
+          where: {
             doctorId: doctorInfo.id,
-            specialtiesId: specialty.specialtiesId,
+            specialtiesId: {
+              in: specialties,
+            },
           },
+          select: {
+            specialtiesId: true,
+          },
+        });
+
+      const currentSpecialtyIds = currentDoctorSpecialties.map(
+        (ds) => ds.specialtiesId,
+      );
+      const newSpecialties = specialties.filter(
+        (id) => !currentSpecialtyIds.includes(id),
+      );
+
+      // Only create new specialties that don't already exist
+      if (newSpecialties.length > 0) {
+        const doctorSpecialtiesData = newSpecialties.map((specialtyId) => ({
+          doctorId: doctorInfo.id,
+          specialtiesId: specialtyId,
+        }));
+
+        await transactionClient.doctorSpecialties.createMany({
+          data: doctorSpecialtiesData,
         });
       }
     }
   });
 
+  // Step 4: Return updated doctor with specialties
   const result = await prisma.doctor.findUniqueOrThrow({
     where: {
       id: doctorInfo.id,

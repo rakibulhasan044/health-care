@@ -1,4 +1,4 @@
-import { Gender, UserRole, UserStatus } from "@prisma/client";
+import { Gender, UserStatus } from "@prisma/client";
 import { z } from "zod";
 
 const createAdmin = z.object({
@@ -42,7 +42,7 @@ const createDoctor = z.object({
       required_error: "appointment fee is required",
     }),
     qualification: z.string({
-      required_error: "quilification is required",
+      required_error: "qualification is required",
     }),
     currentWorkingPlace: z.string({
       required_error: "Current working place is required!",
@@ -50,6 +50,16 @@ const createDoctor = z.object({
     designation: z.string({
       required_error: "Designation is required!",
     }),
+    specialties: z
+      .array(
+        z.string().uuid({
+          message: "Each specialty must be a valid UUID",
+        }),
+      )
+      .min(1, {
+        message: "At least one specialty is required",
+      })
+      .optional(),
   }),
 });
 

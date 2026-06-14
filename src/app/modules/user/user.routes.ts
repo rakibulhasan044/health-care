@@ -8,21 +8,6 @@ import validateRequest from "../../middlewares/validateRequest";
 
 const router = express.Router();
 
-const validateRequestWithPhoto =
-  (schema: any) => (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const data = JSON.parse(req.body.data);
-      req.body = schema.parse(data);
-      next();
-    } catch (err) {
-      router.get(
-        "/",
-        auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
-        UserController.getAllFromDB,
-      );
-    }
-  };
-
 router.get(
   "/me",
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
@@ -39,23 +24,29 @@ router.post(
   "/create-admin",
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
   fileUploader.upload.single("file"),
-  validateRequestWithPhoto(userValidation.createAdmin),
-  UserController.createAdmin,
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = userValidation.createAdmin.parse(JSON.parse(req.body.data));
+    return UserController.createAdmin(req, res, next);
+  },
 );
 
 router.post(
   "/create-doctor",
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
   fileUploader.upload.single("file"),
-  validateRequestWithPhoto(userValidation.createDoctor),
-  UserController.createDoctor,
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = userValidation.createDoctor.parse(JSON.parse(req.body.data));
+    return UserController.createDoctor(req, res, next);
+  },
 );
 
 router.post(
   "/create-patient",
   fileUploader.upload.single("file"),
-  validateRequestWithPhoto(userValidation.createPatient),
-  UserController.createPatient,
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = userValidation.createPatient.parse(JSON.parse(req.body.data));
+    return UserController.createPatient(req, res, next);
+  },
 );
 
 router.patch(

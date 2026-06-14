@@ -1,4 +1,3 @@
-import config from "../../../config";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import { AuthServices } from "./auth.service";
@@ -9,23 +8,16 @@ const loginUser = catchAsync(async (req, res) => {
   const { accessToken, refreshToken } = result;
 
   res.cookie("accessToken", accessToken, {
-    secure: config.env === "production",
+    secure: process.env.NODE_ENV === "production",
     httpOnly: true,
-    sameSite: "none",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 1000 * 60 * 60,
   });
 
   res.cookie("refreshToken", refreshToken, {
-    secure: config.env === "production",
+    secure: process.env.NODE_ENV === "production",
     httpOnly: true,
-    sameSite: "none",
-    maxAge: 1000 * 60 * 60 * 24 * 30,
-  });
-
-  res.cookie("refreshToken", refreshToken, {
-    secure: config.env === "production",
-    httpOnly: true,
-    sameSite: "none",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 1000 * 60 * 60 * 24 * 30,
   });
 
@@ -48,6 +40,12 @@ const refreshToken = catchAsync(async (req, res) => {
   }
 
   const result = await AuthServices.refreshToken(refreshToken);
+  res.cookie("accessToken", result.accessToken, {
+    secure: true,
+    httpOnly: true,
+    sameSite: "none",
+    maxAge: 1000 * 60 * 60,
+  });
 
   sendResponse(res, {
     statusCode: 200,

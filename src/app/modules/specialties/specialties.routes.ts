@@ -2,11 +2,14 @@ import express, { NextFunction, Request, Response } from "express";
 import { SpecialtiesController } from "./specialties.controller";
 import { fileUploader } from "../../../helper/fileUploader";
 import { SpecialtiesValidations } from "./specialties.validations";
+import auth from "../../middlewares/auth";
+import { UserRole } from "@prisma/client";
 
 const router = express.Router();
 
 router.post(
   "/",
+  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
   fileUploader.upload.single("file"),
   (req: Request, res: Response, next: NextFunction) => {
     try {

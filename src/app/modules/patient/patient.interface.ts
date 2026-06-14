@@ -3,7 +3,7 @@ import { BloodGroup, Gender, MaritalStatus } from "@prisma/client";
 export type IPatientFilterRequest = {
   searchTerm?: string;
   email?: string;
-  contactNumber: string;
+  contactNumber?: string;
 };
 
 type IPatientHealthData = {

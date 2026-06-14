@@ -68,44 +68,69 @@ const createDoctor = async (req: Request): Promise<Doctor> => {
     role: UserRole.DOCTOR,
   };
 
+  //extract specialties from doctor data
+  const { specialties, ...doctorData } = data.doctor;
+
   const result = await prisma.$transaction(async (transactionClient) => {
     await transactionClient.user.create({
       data: userData,
     });
 
-    const {
-      email,
-      name,
-      contactNumber,
-      profilePhoto,
-      address,
-      registrationNumber,
-      experience,
-      gender,
-      appointmentFee,
-      qualification,
-      currentWorkingPlace,
-      designation,
-    } = data.doctor;
-
     const createdDoctorData = await transactionClient.doctor.create({
-      data: {
-        name,
-        email,
-        contactNumber,
-        profilePhoto,
-        address,
-        registrationNumber,
-        experience,
-        gender,
-        appointmentFee,
-        qualification,
-        currentWorkingPlace,
-        designation,
-      },
+      data: doctorData,
     });
 
-    return createdDoctorData;
+    //create doctor specialties if provided
+    if (specialties && Array.isArray(specialties) && specialties.length > 0) {
+      const existingSpecialties = await transactionClient.specialties.findMany({
+        where: {
+          id: {
+            in: specialties,
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      const existingSpecialtyIds = existingSpecialties.map((s) => s.id);
+      console.log("existingSpecialtyIds", existingSpecialtyIds);
+      const invalidSpecialties = specialties.filter(
+        (id) => !existingSpecialtyIds.includes(id),
+      );
+
+      if (invalidSpecialties.length > 0) {
+        throw new Error(
+          `Invalid specialty IDs: ${invalidSpecialties.join(", ")}`,
+        );
+      }
+
+      //create doctor specialties relations
+      const doctorSpecialtiesData = specialties.map((specialtyId) => ({
+        doctorId: createdDoctorData.id,
+        specialtiesId: specialtyId,
+      }));
+
+      await transactionClient.doctorSpecialties.createMany({
+        data: doctorSpecialtiesData,
+      });
+    }
+
+    //step-4: return doctor with specialties
+    const doctorWithSpecialties =
+      await transactionClient.doctor.findUniqueOrThrow({
+        where: {
+          id: createdDoctorData.id,
+        },
+        include: {
+          doctorSpecialties: {
+            include: {
+              specialties: true,
+            },
+          },
+        },
+      });
+    return doctorWithSpecialties;
   });
 
   return result;
@@ -114,9 +139,6 @@ const createDoctor = async (req: Request): Promise<Doctor> => {
 const createPatient = async (req: Request) => {
   const file = req.file;
   const data = req.body;
-
-  console.log(file);
-  console.log(data);
 
   if (file) {
     const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
