@@ -155,6 +155,27 @@ const updateIntoDB = async (id: string, payload: any) => {
             },
           },
         });
+      if (existingDoctorSpecialties.length !== removeSpecialties.length) {
+        const foundIds = existingDoctorSpecialties.map(
+          (ds) => ds.specialtiesId,
+        );
+        const notFound = removeSpecialties.filter(
+          (id) => !foundIds.includes(id),
+        );
+        throw new Error(
+          `Cannot remove non-existent specialties: ${notFound.join(", ")}`,
+        );
+      }
+
+      // Delete the specialties
+      await transactionClient.doctorSpecialties.deleteMany({
+        where: {
+          doctorId: doctorInfo.id,
+          specialtiesId: {
+            in: removeSpecialties,
+          },
+        },
+      });
     }
 
     // step: 3 Add New specialties if provided

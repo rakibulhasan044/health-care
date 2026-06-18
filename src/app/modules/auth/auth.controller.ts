@@ -1,7 +1,8 @@
+import config from "../../../config";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import { AuthServices } from "./auth.service";
-import { Request } from "express";
+import { Request, Response } from "express";
 
 const loginUser = catchAsync(async (req, res) => {
   const result = await AuthServices.loginUser(req.body);
@@ -31,14 +32,8 @@ const loginUser = catchAsync(async (req, res) => {
   });
 });
 
-const refreshToken = catchAsync(async (req, res) => {
+const refreshToken = catchAsync(async (req: Request, res: Response) => {
   const { refreshToken } = req.cookies;
-
-  if (!refreshToken) {
-    res.clearCookie("refreshToken");
-    throw new Error("Refresh token not found");
-  }
-
   const result = await AuthServices.refreshToken(refreshToken);
   res.cookie("accessToken", result.accessToken, {
     secure: true,
@@ -47,11 +42,20 @@ const refreshToken = catchAsync(async (req, res) => {
     maxAge: 1000 * 60 * 60,
   });
 
+  res.cookie("refreshToken", result.refreshToken, {
+    secure: true,
+    httpOnly: true,
+    sameSite: "none",
+    maxAge: 1000 * 60 * 60 * 24 * 90,
+  });
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Access token refreshed successfully",
-    data: result,
+    message: "Access token generated successfully!",
+    data: {
+      message: "Access token generated successfully!",
+    },
   });
 });
 
@@ -78,16 +82,51 @@ const forgotPassword = catchAsync(async (req, res) => {
   });
 });
 
-const resetPassword = catchAsync(async (req, res) => {
-  const token = req.headers.authorization || "";
+// const resetPassword = catchAsync(async (req, res) => {
 
-  await AuthServices.resetPassword(token, req.body);
+//   console.log('reset pass con');
+//   const token = req.headers.authorization || "";
+
+//   await AuthServices.resetPassword(token, req.body);
+
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: "Password reset successfully",
+//     data: null,
+//   });
+// });
+
+const resetPassword = catchAsync(async (req: Request & { user?: any }, res: Response) => {
+  // Extract token from Authorization header (remove "Bearer " prefix)
+  const authHeader = req.headers.authorization;
+  // console.log({ authHeader });
+  // const token = authHeader ? authHeader.replace('Bearer ', '') : null;
+  const token = req.headers.authorization || "";
+  // console.log('token');
+  // console.log(token);
+  const user = req.user; // Will be populated if authenticated via middleware
+
+  await AuthServices.resetPassword(token, req.body, user);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Password reset successfully",
+    message: "Password Reset!",
     data: null,
+  });
+});
+
+const getMe = catchAsync(async (req, res) => {
+  const user = req.cookies;
+
+  const result = await AuthServices.getMe(user);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "User retrieved successfully",
+    data: result,
   });
 });
 
@@ -97,4 +136,5 @@ export const AuthController = {
   changePassword,
   forgotPassword,
   resetPassword,
+  getMe
 };
