@@ -2,6 +2,7 @@ import catchAsync from "../../../shared/catchAsync";
 import pick from "../../../shared/pick";
 import sendResponse from "../../../shared/sendResponse";
 import { IAuthUser } from "../../interfaces/common";
+import { scheduleFilterableFields } from "./doctorSchedule.constant";
 import { DoctorScheduleService } from "./doctorSchedule.service";
 
 const createIntoDB = catchAsync(async (req, res) => {
@@ -13,6 +14,21 @@ const createIntoDB = catchAsync(async (req, res) => {
     success: true,
     message: "Doctors schedule created successfully",
     data: result,
+  });
+});
+
+const getAllFromDB = catchAsync(async (req, res) => {
+  const filters = pick(req.query, scheduleFilterableFields);
+  const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+
+  const result = await DoctorScheduleService.getAllFromDB(filters, options);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Doctor schedule retrieval successfully",
+    meta: result.meta,
+    data: result.date,
   });
 });
 
@@ -54,6 +70,7 @@ const deleteFromDB = catchAsync(async (req, res) => {
 
 export const DoctorScheduleController = {
   createIntoDB,
+  getAllFromDB,
   getMySchedule,
   deleteFromDB,
 };

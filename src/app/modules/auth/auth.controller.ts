@@ -39,7 +39,7 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
     secure: true,
     httpOnly: true,
     sameSite: "none",
-    maxAge: 1000 * 60 * 60,
+    maxAge: 1000 * 60 * 30,
   });
 
   res.cookie("refreshToken", result.refreshToken, {
