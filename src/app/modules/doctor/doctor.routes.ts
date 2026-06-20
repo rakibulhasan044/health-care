@@ -9,6 +9,8 @@ const router = express.Router();
 
 router.get("/", DoctorController.getAllFromDB);
 
+router.post('/suggestion', DoctorController.getAISuggestions)
+
 router.get("/:id", DoctorController.getByIdFromDB);
 
 router.patch(

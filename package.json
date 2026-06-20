@@ -24,6 +24,7 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
     "nodemailer": "^8.0.7",
+    "openai": "^6.44.0",
     "prisma": "^6.19.3",
     "sslcommerz-lts": "^1.2.0",
     "ts-node": "^10.9.2",

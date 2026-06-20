@@ -4,6 +4,9 @@ import { IDoctorFilterRequest } from "./doctor.interface";
 import { doctorSearchableFields } from "./doctor.constants";
 import { IPagination } from "../../interfaces/pagination";
 import { calculatePagination } from "../../../helper/paginationHelper";
+import ApiError from "../../errors/ApiError";
+import { extractJsonFromMessage } from "../../../helper/extractJsonFromMessage";
+import { openai } from "../../../helper/open-router";
 
 const getAllFromDB = async (
   filters: IDoctorFilterRequest,
@@ -294,10 +297,62 @@ const softDelete = async (id: string): Promise<Doctor> => {
   });
 };
 
+const getAISuggestions = async (payload: { symptoms: string }) => {
+  if (!(payload && payload.symptoms)) {
+    throw new ApiError(400, "Symptom is required");
+  }
+
+  const doctors = await prisma.doctor.findMany({
+    where: {
+      isDeleted: false,
+    },
+    include: {
+      doctorSpecialties: {
+        include: {
+          specialties: true,
+        },
+      },
+    },
+  });
+  console.log("doctors data loaded.......\n");
+  const prompt = `
+You are a medical assistant AI. Based on the patient's symptoms, suggest the top 3 most suitable doctors.
+Each doctor has specialties and years of experience.
+Only suggest doctors who are relevant to the given symptoms.
+
+Symptoms: ${payload.symptoms}
+
+Here is the doctor list (in JSON):
+${JSON.stringify(doctors, null, 2)}
+
+Return your response in JSON format with full individual doctor data. 
+`;
+
+  console.log("analyzing......\n");
+  const completion = await openai.chat.completions.create({
+    model: "nvidia/nemotron-3-ultra-550b-a55b:free",
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are a helpful AI medical assistant that provides doctor suggestions.",
+      },
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+  });
+
+  const result = await extractJsonFromMessage(completion.choices[0].message);
+  return result;
+};
+
 export const DoctorService = {
   updateIntoDB,
   getAllFromDB,
   getByIdFromDB,
   deleteFromDB,
   softDelete,
+  getAISuggestions,
 };
