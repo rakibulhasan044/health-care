@@ -1,19 +1,18 @@
-import { AppointmentStatus, PaymentStatus, Prisma } from "@prisma/client";
+import {
+  AppointmentStatus,
+  PaymentStatus,
+  Prescription,
+  Prisma,
+} from "@prisma/client";
 import { IAuthUser } from "../../interfaces/common";
 import prisma from "../../../shared/prisma";
 import ApiError from "../../errors/ApiError";
 import { IPagination } from "../../interfaces/pagination";
 import { calculatePagination } from "../../../helper/paginationHelper";
 
-interface CreatePrescriptionPayload {
-  appointmentId: string;
-  instructions: string;
-  followUpDate: Date | string;
-}
-
 const insertIntoDB = async (
   user: IAuthUser,
-  payload: CreatePrescriptionPayload,
+  payload: Partial<Prescription>,
 ) => {
   const appointmentData = await prisma.appointment.findUniqueOrThrow({
     where: {
@@ -36,7 +35,7 @@ const insertIntoDB = async (
       doctorId: appointmentData.doctorId,
       patientId: appointmentData.patientId,
       instructions: payload.instructions as string,
-      followUpDate: payload.followUpDate,
+      followUpDate: payload.followUpDate || null || undefined,
     },
     include: {
       patient: true,
@@ -46,10 +45,7 @@ const insertIntoDB = async (
   return result;
 };
 
-const patientPrescription = async (
-  user: IAuthUser,
-  options: IPagination,
-) => {
+const patientPrescription = async (user: IAuthUser, options: IPagination) => {
   const { limit, page, skip } = calculatePagination(options);
 
   const result = await prisma.prescription.findMany({
@@ -146,5 +142,5 @@ const getAllFromDB = async (filters: any, options: IPagination) => {
 export const PrescriptionService = {
   insertIntoDB,
   patientPrescription,
-  getAllFromDB
+  getAllFromDB,
 };
