@@ -18,6 +18,12 @@ router.post(
   AppointmentController.createAppointment,
 );
 
-// get all appointment with filtering only accessable for admin and super admin
+router.patch(
+  "/status/:id",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTOR),
+  AppointmentController.changeAppointmentStatus,
+);
+
+// get all appointment with filtering only accessible for admin and super admin
 
 export const AppointmentRoutes = router;

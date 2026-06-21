@@ -330,7 +330,7 @@ Return your response in JSON format with full individual doctor data.
 
   console.log("analyzing......\n");
   const completion = await openai.chat.completions.create({
-    model: "nvidia/nemotron-3-ultra-550b-a55b:free",
+    model: "qwen/qwen3-next-80b-a3b-instruct:free",
     messages: [
       {
         role: "system",
