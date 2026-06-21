@@ -3,20 +3,29 @@ import cors from "cors";
 import router from "./app/routes";
 import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import cookieParser from "cookie-parser";
+import { AppointmentService } from "./app/modules/appointment/appointment.service";
+import cron from "node-cron";
 
 const app: Application = express();
 app.use(
   cors({
     origin: "http://localhost:3000",
     credentials: true,
-  })
+  }),
 );
 app.use(cookieParser());
-
 
 //parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+cron.schedule("* * * * *", () => {
+  try {
+    AppointmentService.cancelUnpaidAppointments();
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello Healthcare Server");
