@@ -148,14 +148,62 @@ const getAllFromDB = async (
   };
 };
 
-//delete and id get task
-const deleteAllSchedule = async () => {
-  const deleteSchedules = await prisma.schedule.deleteMany({});
+const getScheduleById = async (id: string) => {
+  const schedule = await prisma.schedule.findUnique({
+    where: {
+      id,
+    },
+  });
+  return schedule;
+};
+
+const updateScheduleById = async (id: string, payload: ISchedule) => {
+  const { startDate, endDate, startTime, endTime } = payload;
+  const startDateTime = new Date(
+    addMinutes(
+      addHours(
+        `${format(new Date(startDate), "yyyy-MM-dd")}`,
+        Number(startTime.split(":")[0]),
+      ),
+      Number(startTime.split(":")[1]),
+    ),
+  );
+
+  const endDateTime = new Date(
+    addMinutes(
+      addHours(
+        `${format(new Date(endDate), "yyyy-MM-dd")}`,
+        Number(endTime.split(":")[0]),
+      ),
+      Number(endTime.split(":")[1]),
+    ),
+  );
+
+  const updateSchedule = await prisma.schedule.update({
+    where: {
+      id,
+    },
+    data: {
+      startDateTime,
+      endDateTime,
+    },
+  });
+  return updateSchedule;
+};
+
+const deleteScheduleById = async (id: string) => {
+  const deleteSchedules = await prisma.schedule.delete({
+    where: {
+      id,
+    },
+  });
   return deleteSchedules;
 };
 
 export const ScheduleService = {
   createIntoDB,
-  deleteAllSchedule,
   getAllFromDB,
+  getScheduleById,
+  updateScheduleById,
+  deleteScheduleById,
 };

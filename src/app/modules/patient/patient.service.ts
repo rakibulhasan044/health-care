@@ -8,7 +8,7 @@ import { IPagination } from "../../interfaces/pagination";
 const getAllFromDB = async (
   filters: IPatientFilterRequest,
   options: IPagination,
-  includeHealthData: boolean = false // NEW PARAMETER
+  includeHealthData: boolean = false, // NEW PARAMETER
 ) => {
   const { limit, page, skip } = calculatePagination(options);
   const { searchTerm, ...filterData } = filters;
@@ -48,18 +48,18 @@ const getAllFromDB = async (
   // Conditional include based on parameter
   const includeClause = includeHealthData
     ? {
-      medicalReport: true,
-      patientHealthData: true,
-    }
+        medicalReports: true,
+        patientHealthData: true,
+      }
     : {
-      medicalReport: {
-        select: {
-          id: true,
-          reportName: true,
-          createdAt: true,
+        medicalReports: {
+          select: {
+            id: true,
+            reportName: true,
+            createdAt: true,
+          },
         },
-      },
-    };
+      };
 
   const result = await prisma.patient.findMany({
     where: whereConditions,
@@ -69,8 +69,8 @@ const getAllFromDB = async (
       options.sortBy && options.sortOrder
         ? { [options.sortBy]: options.sortOrder }
         : {
-          createdAt: "desc",
-        },
+            createdAt: "desc",
+          },
     include: includeClause,
   });
 

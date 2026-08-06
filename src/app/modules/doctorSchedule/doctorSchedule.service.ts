@@ -6,7 +6,6 @@ import { IPagination } from "../../interfaces/pagination";
 import ApiError from "../../errors/ApiError";
 import httpStatus from "http-status";
 import { IDoctorScheduleFilterRequest } from "./doctorSchedule.interface";
-import { date } from "zod";
 
 const createIntoDB = async (user: any, payload: { scheduleIds: string[] }) => {
   const doctorData = await prisma.doctor.findUniqueOrThrow({

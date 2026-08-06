@@ -6,6 +6,7 @@ import pick from "../../../shared/pick";
 import { patientFilterableFields } from "./patient.constants";
 
 const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
+
   const filters = pick(req.query, patientFilterableFields);
   const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
 

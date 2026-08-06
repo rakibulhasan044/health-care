@@ -5,7 +5,10 @@ import { calculatePagination } from "../../../helper/paginationHelper";
 import { IPagination } from "../../interfaces/pagination";
 import { IAdminFilterRequest } from "./admin.interface";
 
-const getAllFromDB = async (params: IAdminFilterRequest, options: IPagination) => {
+const getAllFromDB = async (
+  params: IAdminFilterRequest,
+  options: IPagination,
+) => {
   const { limit, page, skip } = calculatePagination(options);
   const { searchTerm, ...filterData } = params;
 

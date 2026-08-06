@@ -16,11 +16,15 @@ const createIntoDB = catchAsync(async (req, res) => {
 });
 
 const getAllFromDB = catchAsync(async (req, res) => {
-  const filters = pick(req.query, ['startDate', 'endDate'])
-  const options =pick(req.query, ['limit', 'page', 'sortby', 'sortOrder'])
-  const user = req.user
+  const filters = pick(req.query, ["startDate", "endDate"]);
+  const options = pick(req.query, ["limit", "page", "sortby", "sortOrder"]);
+  const user = req.user;
 
-  const result = await ScheduleService.getAllFromDB(filters, options, user as IAuthUser);
+  const result = await ScheduleService.getAllFromDB(
+    filters,
+    options,
+    user as IAuthUser,
+  );
 
   sendResponse(res, {
     statusCode: 200,
@@ -30,8 +34,33 @@ const getAllFromDB = catchAsync(async (req, res) => {
   });
 });
 
-const deleteAllSchedule = catchAsync(async (req, res) => {
-  const result = await ScheduleService.deleteAllSchedule();
+const getScheduleById = catchAsync(async (req, res) => {
+  const result = await ScheduleService.getScheduleById(req.params.id as string);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Schedule fetched successfully",
+    data: result,
+  });
+});
+
+const updateScheduleById = catchAsync(async (req, res) => {
+  const result = await ScheduleService.updateScheduleById(
+    req.params.id as string,
+    req.body,
+  );
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Schedule updated successfully",
+    data: result,
+  });
+});
+
+const deleteScheduleById = catchAsync(async (req, res) => {
+  const result = await ScheduleService.deleteScheduleById(
+    req.params.id as string,
+  );
 
   sendResponse(res, {
     statusCode: 200,
@@ -43,6 +72,8 @@ const deleteAllSchedule = catchAsync(async (req, res) => {
 
 export const ScheduleController = {
   createIntoDB,
-  deleteAllSchedule,
-  getAllFromDB
+  getAllFromDB,
+  getScheduleById,
+  updateScheduleById,
+  deleteScheduleById,
 };
