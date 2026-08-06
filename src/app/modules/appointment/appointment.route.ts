@@ -12,7 +12,7 @@ router.get(
 );
 
 router.post(
-  "/",
+  "/book-appointment",
   auth(UserRole.PATIENT),
   // add zod validation
   AppointmentController.createAppointment,
@@ -24,6 +24,16 @@ router.patch(
   AppointmentController.changeAppointmentStatus,
 );
 
-// get all appointment with filtering only accessible for admin and super admin
+router.post(
+  "/book-appointment-with-pay_later",
+  auth(UserRole.PATIENT),
+  AppointmentController.createAppointmentWithPaymentLater,
+);
+
+router.post(
+  "/initiate-payment/:id",
+  auth(UserRole.PATIENT),
+  AppointmentController.initiatePayment,
+);
 
 export const AppointmentRoutes = router;

@@ -64,9 +64,41 @@ const changeAppointmentStatus = catchAsync(async (req, res) => {
   });
 });
 
+const createAppointmentWithPaymentLater = catchAsync(async (req, res) => {
+  const user = req.user;
+  const result = await AppointmentService.createAppointmentWithPaymentLater(
+    user as IAuthUser,
+    req.body,
+  );
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Appointment created successfully with payment later option",
+    data: result,
+  });
+});
+
+const initiatePayment = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const user = req.user;
+
+  const result = await AppointmentService.initiatePayment(
+    id as string,
+    user as IAuthUser
+  );
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Payment initiated successfully",
+    data: result,
+  });
+});
+
 export const AppointmentController = {
   createAppointment,
   allAppointments,
   getMyAppointment,
   changeAppointmentStatus,
+  createAppointmentWithPaymentLater,
+  initiatePayment
 };

@@ -156,8 +156,6 @@ const deleteFromDB = async (user: IAuthUser, scheduleId: string) => {
   });
 };
 
-//all doctor schedule task
-
 const getAllFromDB = async (
   filters: IDoctorScheduleFilterRequest,
   options: IPagination,
