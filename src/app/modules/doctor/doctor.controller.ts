@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import catchAsync from "../../../shared/catchAsync";
-import sendResponse from "../../../shared/sendResponse";
+import catchAsync from "../../shared/catchAsync";
+import sendResponse from "../../shared/sendResponse";
 import { DoctorService } from "./doctor.service";
-import pick from "../../../shared/pick";
+import pick from "../../shared/pick";
 import { doctorFilterableFields } from "./doctor.constants";
 import httpStatus from "http-status";
 
@@ -66,17 +66,16 @@ const softDelete = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getAISuggestions = catchAsync(async(req, res) => {
-
+const getAISuggestions = catchAsync(async (req, res) => {
   console.log(req.body);
-  const result = await DoctorService.getAISuggestions(req.body)
-    sendResponse(res, {
+  const result = await DoctorService.getAISuggestions(req.body);
+  sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: "AI suggestions fetched",
     data: result,
   });
-})
+});
 
 export const DoctorController = {
   getAllFromDB,
@@ -84,5 +83,5 @@ export const DoctorController = {
   getByIdFromDB,
   deleteFromDB,
   softDelete,
-  getAISuggestions
+  getAISuggestions,
 };

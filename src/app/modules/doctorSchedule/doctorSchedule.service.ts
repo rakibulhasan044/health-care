@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
-import { calculatePagination } from "../../../helper/paginationHelper";
-import prisma from "../../../shared/prisma";
+import { calculatePagination } from "../../helper/paginationHelper";
+import prisma from "../../shared/prisma";
 import { IAuthUser } from "../../interfaces/common";
 import { IPagination } from "../../interfaces/pagination";
 import ApiError from "../../errors/ApiError";
@@ -39,8 +39,8 @@ const getMySchedule = async (
       email: user?.email,
     },
     select: {
-      id: true
-    }
+      id: true,
+    },
   });
 
   const andConditions = [];

@@ -1,6 +1,6 @@
-import catchAsync from "../../../shared/catchAsync";
-import pick from "../../../shared/pick";
-import sendResponse from "../../../shared/sendResponse";
+import catchAsync from "../../shared/catchAsync";
+import pick from "../../shared/pick";
+import sendResponse from "../../shared/sendResponse";
 import { IAuthUser } from "../../interfaces/common";
 import { scheduleFilterableFields } from "./doctorSchedule.constant";
 import { DoctorScheduleService } from "./doctorSchedule.service";

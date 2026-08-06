@@ -36,5 +36,9 @@ export default {
     cancel_url: process.env.CANCEL_URL,
     ssl_payment_api: process.env.SSL_PAYMENT_API,
     ssl_validation_api: process.env.SSL_VALIDATION_API,
-  }
+  },
+  stripe: {
+    stripe_secret_key: process.env.STRIPE_SECRET_KEY,
+    stripe_webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
+  },
 };

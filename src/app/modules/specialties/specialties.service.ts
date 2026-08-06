@@ -1,6 +1,6 @@
 import { Request } from "express";
-import { fileUploader } from "../../../helper/fileUploader";
-import prisma from "../../../shared/prisma";
+import { fileUploader } from "../../helper/fileUploader";
+import prisma from "../../shared/prisma";
 
 const insertIntoDB = async (req: Request) => {
   const file = req.file as Express.Multer.File;
@@ -41,12 +41,12 @@ const deleteFromDB = async (id: string) => {
     },
   });
 
-  return result
+  return result;
 };
 
 export const SpecialtiesService = {
   insertIntoDB,
   getAllFromDB,
   getById,
-  deleteFromDB
+  deleteFromDB,
 };

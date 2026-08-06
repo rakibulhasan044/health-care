@@ -1,5 +1,5 @@
-import catchAsync from "../../../shared/catchAsync";
-import sendResponse from "../../../shared/sendResponse";
+import catchAsync from "../../shared/catchAsync";
+import sendResponse from "../../shared/sendResponse";
 import { SpecialtiesService } from "./specialties.service";
 
 const insertIntoDB = catchAsync(async (req, res) => {
@@ -51,4 +51,3 @@ export const SpecialtiesController = {
   getById,
   deleteFromDB,
 };
-

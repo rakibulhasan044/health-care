@@ -4,7 +4,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "stripe:webhook": "stripe listen --forward-to localhost:4000/webhook",
+    "studio": "prisma studio"
   },
   "author": "",
   "license": "ISC",
@@ -28,6 +30,7 @@
     "openai": "^6.44.0",
     "prisma": "^6.19.3",
     "sslcommerz-lts": "^1.2.0",
+    "stripe": "^22.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3",
     "uuid": "^8.3.2",

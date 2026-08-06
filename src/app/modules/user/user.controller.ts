@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { UserService } from "./user.service";
-import sendResponse from "../../../shared/sendResponse";
-import catchAsync from "../../../shared/catchAsync";
-import pick from "../../../shared/pick";
+import sendResponse from "../../shared/sendResponse";
+import catchAsync from "../../shared/catchAsync";
+import pick from "../../shared/pick";
 import { userFilterableFields } from "./user.constant";
 import { IAuthUser } from "../../interfaces/common";
 
@@ -17,8 +17,11 @@ const createAdmin = async (req: Request, res: Response, next: NextFunction) => {
   });
 };
 
-const createDoctor = async (req: Request, res: Response, next: NextFunction) => {
-
+const createDoctor = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   console.log("req from controller ->", req.body);
   const result = await UserService.createDoctor(req);
 
@@ -30,7 +33,11 @@ const createDoctor = async (req: Request, res: Response, next: NextFunction) => 
   });
 };
 
-const createPatient = async (req: Request, res: Response, next: NextFunction) => {
+const createPatient = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const result = await UserService.createPatient(req);
 
   sendResponse(res, {
@@ -69,7 +76,7 @@ const changeProfileStatus = catchAsync(async (req, res) => {
 });
 
 const getMyProfile = catchAsync(async (req, res) => {
-  const user = req.user
+  const user = req.user;
   const result = await UserService.getMyProfile(user as IAuthUser);
 
   sendResponse(res, {
@@ -81,7 +88,7 @@ const getMyProfile = catchAsync(async (req, res) => {
 });
 
 const updateMyProfile = catchAsync(async (req, res) => {
-  const user = req.user
+  const user = req.user;
   const result = await UserService.updateMyProfile(user as IAuthUser, req);
 
   sendResponse(res, {
@@ -99,5 +106,5 @@ export const UserController = {
   getAllFromDB,
   changeProfileStatus,
   getMyProfile,
-  updateMyProfile
+  updateMyProfile,
 };

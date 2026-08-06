@@ -1,9 +1,9 @@
-import catchAsync from "../../../shared/catchAsync";
-import sendResponse from "../../../shared/sendResponse";
+import catchAsync from "../../shared/catchAsync";
+import sendResponse from "../../shared/sendResponse";
 import httpStatus from "http-status";
 import { ReviewService } from "./review.service";
 import { IAuthUser } from "../../interfaces/common";
-import pick from "../../../shared/pick";
+import pick from "../../shared/pick";
 import { reviewFilterableFields } from "./review.constant";
 
 const insertIntoDB = catchAsync(async (req, res) => {

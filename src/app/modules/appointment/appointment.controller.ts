@@ -1,6 +1,6 @@
-import catchAsync from "../../../shared/catchAsync";
-import pick from "../../../shared/pick";
-import sendResponse from "../../../shared/sendResponse";
+import catchAsync from "../../shared/catchAsync";
+import pick from "../../shared/pick";
+import sendResponse from "../../shared/sendResponse";
 import { IAuthUser } from "../../interfaces/common";
 import { AppointmentService } from "./appointment.service";
 
@@ -15,6 +15,15 @@ const createAppointment = catchAsync(async (req, res) => {
     success: true,
     message: "Appointment created successfully",
     data: result,
+  });
+});
+
+const allAppointments = catchAsync(async (req, res) => {
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Appointment created successfully",
+    data: {},
   });
 });
 
@@ -40,9 +49,13 @@ const getMyAppointment = catchAsync(async (req, res) => {
 const changeAppointmentStatus = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
-  const user = req.user
+  const user = req.user;
 
-  const result = await AppointmentService.changeAppointmentStatus(id as string, status, user as IAuthUser);
+  const result = await AppointmentService.changeAppointmentStatus(
+    id as string,
+    status,
+    user as IAuthUser,
+  );
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -53,6 +66,7 @@ const changeAppointmentStatus = catchAsync(async (req, res) => {
 
 export const AppointmentController = {
   createAppointment,
+  allAppointments,
   getMyAppointment,
   changeAppointmentStatus,
 };

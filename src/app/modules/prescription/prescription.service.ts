@@ -5,10 +5,10 @@ import {
   Prisma,
 } from "@prisma/client";
 import { IAuthUser } from "../../interfaces/common";
-import prisma from "../../../shared/prisma";
+import prisma from "../../shared/prisma";
 import ApiError from "../../errors/ApiError";
 import { IPagination } from "../../interfaces/pagination";
-import { calculatePagination } from "../../../helper/paginationHelper";
+import { calculatePagination } from "../../helper/paginationHelper";
 
 const insertIntoDB = async (
   user: IAuthUser,

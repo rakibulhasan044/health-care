@@ -1,10 +1,10 @@
 import { Admin, Doctor, Prisma, UserRole, UserStatus } from "@prisma/client";
 import * as bcrypt from "bcrypt";
-import prisma from "../../../shared/prisma";
-import { fileUploader } from "../../../helper/fileUploader";
+import prisma from "../../shared/prisma";
+import { fileUploader } from "../../helper/fileUploader";
 import { Request } from "express";
 import { IPagination } from "../../interfaces/pagination";
-import { calculatePagination } from "../../../helper/paginationHelper";
+import { calculatePagination } from "../../helper/paginationHelper";
 import { userSearchableFields } from "./user.constant";
 import { IAuthUser } from "../../interfaces/common";
 

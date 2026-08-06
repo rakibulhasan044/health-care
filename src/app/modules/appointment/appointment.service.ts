@@ -1,9 +1,9 @@
-import prisma from "../../../shared/prisma";
+import prisma from "../../shared/prisma";
 import { IAuthUser } from "../../interfaces/common";
 import { v4 as uuidv4 } from "uuid";
 import { IFilterRequest } from "../schedule/schedule.interface";
 import { IPagination } from "../../interfaces/pagination";
-import { calculatePagination } from "../../../helper/paginationHelper";
+import { calculatePagination } from "../../helper/paginationHelper";
 import {
   AppointmentStatus,
   PaymentStatus,
@@ -88,6 +88,10 @@ const createAppointment = async (user: IAuthUser, payload: any) => {
   });
 
   return result;
+};
+
+const allAppointments = async () => {
+  console.log("complete all appointment task later");
 };
 
 const getMyAppointment = async (
@@ -238,11 +242,11 @@ const cancelUnpaidAppointments = async () => {
       });
     }
   });
-
 };
 
 export const AppointmentService = {
   createAppointment,
+  allAppointments,
   getMyAppointment,
   changeAppointmentStatus,
   cancelUnpaidAppointments,

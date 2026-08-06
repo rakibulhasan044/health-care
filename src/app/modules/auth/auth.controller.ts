@@ -1,6 +1,6 @@
 import config from "../../../config";
-import catchAsync from "../../../shared/catchAsync";
-import sendResponse from "../../../shared/sendResponse";
+import catchAsync from "../../shared/catchAsync";
+import sendResponse from "../../shared/sendResponse";
 import { AuthServices } from "./auth.service";
 import { Request, Response } from "express";
 
@@ -97,25 +97,27 @@ const forgotPassword = catchAsync(async (req, res) => {
 //   });
 // });
 
-const resetPassword = catchAsync(async (req: Request & { user?: any }, res: Response) => {
-  // Extract token from Authorization header (remove "Bearer " prefix)
-  const authHeader = req.headers.authorization;
-  // console.log({ authHeader });
-  // const token = authHeader ? authHeader.replace('Bearer ', '') : null;
-  const token = req.headers.authorization || "";
-  // console.log('token');
-  // console.log(token);
-  const user = req.user; // Will be populated if authenticated via middleware
+const resetPassword = catchAsync(
+  async (req: Request & { user?: any }, res: Response) => {
+    // Extract token from Authorization header (remove "Bearer " prefix)
+    const authHeader = req.headers.authorization;
+    // console.log({ authHeader });
+    // const token = authHeader ? authHeader.replace('Bearer ', '') : null;
+    const token = req.headers.authorization || "";
+    // console.log('token');
+    // console.log(token);
+    const user = req.user; // Will be populated if authenticated via middleware
 
-  await AuthServices.resetPassword(token, req.body, user);
+    await AuthServices.resetPassword(token, req.body, user);
 
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: "Password Reset!",
-    data: null,
-  });
-});
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Password Reset!",
+      data: null,
+    });
+  },
+);
 
 const getMe = catchAsync(async (req, res) => {
   const user = req.cookies;
@@ -136,5 +138,5 @@ export const AuthController = {
   changePassword,
   forgotPassword,
   resetPassword,
-  getMe
+  getMe,
 };

@@ -5,6 +5,7 @@ import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import cookieParser from "cookie-parser";
 import { AppointmentService } from "./app/modules/appointment/appointment.service";
 import cron from "node-cron";
+import { PaymentController } from "./app/modules/payment/payment.controller";
 
 const app: Application = express();
 app.use(
@@ -14,6 +15,12 @@ app.use(
   }),
 );
 app.use(cookieParser());
+
+app.post(
+  "/webhook",
+  express.raw({ type: "application/json" }),
+  PaymentController.handleStripeWebhookEvent,
+);
 
 //parser
 app.use(express.json());
