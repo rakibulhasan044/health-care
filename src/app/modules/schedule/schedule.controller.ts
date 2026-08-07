@@ -5,6 +5,8 @@ import { IAuthUser } from "../../interfaces/common";
 import { ScheduleService } from "./schedule.service";
 
 const createIntoDB = catchAsync(async (req, res) => {
+
+  console.log("server hit");
   const result = await ScheduleService.createIntoDB(req.body);
 
   sendResponse(res, {

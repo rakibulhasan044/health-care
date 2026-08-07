@@ -11,6 +11,8 @@ router.get(
   AppointmentController.getMyAppointment,
 );
 
+router.get("/", auth(UserRole.SUPER_ADMIN, UserRole.ADMIN), AppointmentController.allAppointments);
+
 router.post(
   "/book-appointment",
   auth(UserRole.PATIENT),

@@ -3,6 +3,7 @@ import pick from "../../shared/pick";
 import sendResponse from "../../shared/sendResponse";
 import { IAuthUser } from "../../interfaces/common";
 import { AppointmentService } from "./appointment.service";
+import { appointmentFilterableFields } from "./appointment.constant";
 
 const createAppointment = catchAsync(async (req, res) => {
   const user = req.user;
@@ -19,11 +20,15 @@ const createAppointment = catchAsync(async (req, res) => {
 });
 
 const allAppointments = catchAsync(async (req, res) => {
+  const filters = pick(req.query, appointmentFilterableFields);
+  const options = pick(req.query, ["limit", "page", 'sortBy', 'sortOrder']);
+  const result = await AppointmentService.allAppointments(filters, options);
+  console.log("result", result)
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: "Appointment created successfully",
-    data: {},
+    data: result,
   });
 });
 
@@ -84,7 +89,7 @@ const initiatePayment = catchAsync(async (req, res) => {
 
   const result = await AppointmentService.initiatePayment(
     id as string,
-    user as IAuthUser
+    user as IAuthUser,
   );
   sendResponse(res, {
     statusCode: 200,
@@ -100,5 +105,5 @@ export const AppointmentController = {
   getMyAppointment,
   changeAppointmentStatus,
   createAppointmentWithPaymentLater,
-  initiatePayment
+  initiatePayment,
 };
