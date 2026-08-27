@@ -28,6 +28,18 @@ const validatePayment = catchAsync(async (req, res) => {
   });
 });
 
+const verifyStripePayment = catchAsync(async (req, res) => {
+  const { sessionId } = req.query;
+  const result = await PaymentService.verifyStripePayment(sessionId as string);
+  
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Stripe payment verified successfully",
+    data: result,
+  });
+});
+
 const handleStripeWebhookEvent = catchAsync(async (req, res) => {
   const signature = req.headers["stripe-signature"] as string;
   const webhookSecret = config.stripe.stripe_webhook_secret;
@@ -71,5 +83,6 @@ const handleStripeWebhookEvent = catchAsync(async (req, res) => {
 export const PaymentController = {
   initPayment,
   validatePayment,
+  verifyStripePayment,
   handleStripeWebhookEvent
 };

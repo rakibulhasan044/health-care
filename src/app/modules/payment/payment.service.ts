@@ -3,6 +3,7 @@ import prisma from "../../shared/prisma";
 import { SSLService } from "../SSL/ssl.service";
 import { IPaymentData } from "../SSL/ssl.interface";
 import Stripe from "stripe";
+import { stripe } from "../../../config/stripe.config";
 
 const initPayment = async (appointmentId: string) => {
   const paymentData = await prisma.payment.findFirstOrThrow({
@@ -169,8 +170,46 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
   };
 };
 
+const verifyStripePayment = async (sessionId: string) => {
+  if (!sessionId) {
+    throw new Error("Session ID is required");
+  }
+
+  const session = await stripe.checkout.sessions.retrieve(sessionId);
+  if (!session) {
+    throw new Error("Invalid session ID");
+  }
+
+  const appointmentId = session?.metadata?.appointmentId;
+  const paymentId = session?.metadata?.paymentId;
+
+  if (!appointmentId || !paymentId) {
+    throw new Error("Missing appointmentId or paymentId in session metadata");
+  }
+
+  if (session.payment_status === "paid") {
+    await prisma.$transaction(async (tx) => {
+      await tx.appointment.update({
+        where: { id: appointmentId },
+        data: { paymentStatus: PaymentStatus.PAID },
+      });
+
+      await tx.payment.update({
+        where: { id: paymentId },
+        data: {
+          status: PaymentStatus.PAID,
+          paymentGatewayData: session as any,
+        },
+      });
+    });
+  }
+
+  return { message: "Payment verified" };
+};
+
 export const PaymentService = {
   initPayment,
   validatePayment,
+  verifyStripePayment,
   handleStripeWebhookEvent
 };

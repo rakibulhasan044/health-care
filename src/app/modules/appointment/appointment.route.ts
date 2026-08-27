@@ -27,7 +27,7 @@ router.patch(
 );
 
 router.post(
-  "/book-appointment-with-pay_later",
+  "/book-appointment-with-pay-later",
   auth(UserRole.PATIENT),
   AppointmentController.createAppointmentWithPaymentLater,
 );

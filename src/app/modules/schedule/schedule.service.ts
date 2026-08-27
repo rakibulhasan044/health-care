@@ -5,6 +5,8 @@ import { IFilterRequest, ISchedule } from "./schedule.interface";
 import { IPagination } from "../../interfaces/pagination";
 import { calculatePagination } from "../../helper/paginationHelper";
 import { IAuthUser } from "../../interfaces/common";
+import ApiError from "../../errors/ApiError";
+import httpStatus from "http-status";
 
 const createIntoDB = async (payload: ISchedule): Promise<Schedule[]> => {
   const { startDate, endDate, startTime, endTime } = payload;
@@ -192,10 +194,32 @@ const updateScheduleById = async (id: string, payload: ISchedule) => {
 };
 
 const deleteScheduleById = async (id: string) => {
+  // Check if this schedule is booked by any doctor
+  const assignedToDoctor = await prisma.doctorSchedules.findFirst({
+    where: { scheduleId: id },
+  });
+
+  if (assignedToDoctor) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "Cannot delete this schedule because it has already been booked by a doctor. Please cancel the related appointment first.",
+    );
+  }
+
+  // Check if there is an appointment linked to this schedule
+  const linkedAppointment = await prisma.appointment.findFirst({
+    where: { scheduleId: id },
+  });
+
+  if (linkedAppointment) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "Cannot delete this schedule because it is linked to an existing appointment.",
+    );
+  }
+
   const deleteSchedules = await prisma.schedule.delete({
-    where: {
-      id,
-    },
+    where: { id },
   });
   return deleteSchedules;
 };

@@ -101,9 +101,9 @@ const createAppointment = async (user: IAuthUser, payload: any) => {
         paymentId: paymentData.id,
       },
 
-      success_url: `${process.env.FRONTEND_URL}/dashboard/payment/payment-success`,
+      success_url: `${process.env.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
 
-      cancel_url: `${process.env.FRONTEND_URL}/dashboard/appointments`,
+      cancel_url: `${process.env.FRONTEND_URL}/dashboard/my-appointments`,
     });
     return {
       appointmentData,
@@ -246,10 +246,9 @@ const initiatePayment = async (appointmentId: string, user: IAuthUser) => {
       paymentId: appointmentData.payment.id,
     },
 
-    success_url: `${process.env.FRONTEND_URL}/dashboard/payment/payment-success?appointment_id=${appointmentData.id}&payment_id=${appointmentData.payment.id}`,
+    success_url: `${process.env.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
 
-    // cancel_url: `${envVars.FRONTEND_URL}/dashboard/payment/payment-failed`,
-    cancel_url: `${process.env.FRONTEND_URL}/dashboard/appointments?error=payment_cancelled`,
+    cancel_url: `${process.env.FRONTEND_URL}/dashboard/my-appointments?error=payment_cancelled`,
   });
 
   return {

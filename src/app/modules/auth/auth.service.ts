@@ -9,12 +9,16 @@ import ApiError from "../../errors/ApiError";
 import httpStatus from "http-status";
 
 const loginUser = async (payload: { email: string; password: string }) => {
-  const userData = await prisma.user.findUniqueOrThrow({
+  const userData = await prisma.user.findUnique({
     where: {
       email: payload.email,
       status: UserStatus.ACTIVE,
     },
   });
+
+  if (!userData) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User does not exist or is not active");
+  }
 
   const isCorrectPassword: boolean = await bcrypt.compare(
     payload.password,
@@ -22,7 +26,7 @@ const loginUser = async (payload: { email: string; password: string }) => {
   );
 
   if (!isCorrectPassword) {
-    throw new Error("Incorrect password!");
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect password!");
   }
 
   const accessToken = jwtHelpers.generateToken(
