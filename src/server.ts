@@ -19,7 +19,7 @@ async function main() {
           .then(res => res.text())
           .then(data => console.log("[KeepAlive] Auto-ping successful:", data))
           .catch(err => console.error("[KeepAlive] Auto-ping failed:", err.message));
-      }, 5 * 60 * 1000);
+      }, 13.5 * 60 * 1000);
     });
 
     // graceful shutdown
