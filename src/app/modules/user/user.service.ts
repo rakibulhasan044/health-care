@@ -151,6 +151,7 @@ const createPatient = async (req: Request) => {
     email: data.patient.email,
     password: hashedPassword,
     role: UserRole.PATIENT,
+    needPasswordChange: false,
   };
 
   const result = await prisma.$transaction(async (transactionClient) => {
@@ -338,6 +339,13 @@ const updateMyProfile = async (user: IAuthUser, req: Request) => {
       data: req.body,
     });
   } else if (userInfo.role === UserRole.DOCTOR) {
+    if (req.body.experience) {
+      req.body.experience = parseInt(req.body.experience, 10);
+    }
+    if (req.body.appointmentFee) {
+      req.body.appointmentFee = parseInt(req.body.appointmentFee, 10);
+    }
+    
     profileInfo = await prisma.doctor.update({
       where: {
         email: userInfo.email,

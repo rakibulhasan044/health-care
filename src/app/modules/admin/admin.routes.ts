@@ -28,13 +28,13 @@ router.patch(
 
 router.delete(
   "/:id",
-  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+  auth(UserRole.SUPER_ADMIN),
   AdminController.deleteFromDB,
 );
 
 router.delete(
   "/soft/:id",
-  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+  auth(UserRole.SUPER_ADMIN),
   AdminController.softDeleteFromDB,
 );
 

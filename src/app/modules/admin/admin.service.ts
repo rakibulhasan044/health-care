@@ -1,4 +1,4 @@
-import { Admin, Prisma } from "@prisma/client";
+import { Admin, Prisma, UserRole } from "@prisma/client";
 import { adminSearchAbleFields } from "./admin.constant";
 import prisma from "../../shared/prisma";
 import { calculatePagination } from "../../helper/paginationHelper";
@@ -37,6 +37,11 @@ const getAllFromDB = async (
 
   andCondition.push({
     isDeleted: false,
+    user: {
+      is: {
+        role: UserRole.ADMIN,
+      },
+    },
   });
 
   const whereConditions: Prisma.AdminWhereInput = {

@@ -13,7 +13,7 @@ async function main() {
       data: {
         email: "rhrakib044@gmail.com",
         password: hashedPassword,
-        role: UserRole.ADMIN,
+        role: UserRole.SUPER_ADMIN,
         needPasswordChange: false,
         admin: {
           create: {

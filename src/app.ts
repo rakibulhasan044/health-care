@@ -29,11 +29,12 @@ app.post(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-cron.schedule("* * * * *", () => {
+// Run every 30 minutes to save Neon Database compute hours!
+cron.schedule("*/30 * * * *", async () => {
   try {
-    AppointmentService.cancelUnpaidAppointments();
+    await AppointmentService.cancelUnpaidAppointments();
   } catch (error) {
-    console.log(error);
+    console.error("Cron job failed to cancel unpaid appointments:", error);
   }
 });
 
